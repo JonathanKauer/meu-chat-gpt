@@ -1,0 +1,38 @@
+// api/chat.js
+
+import { Configuration, OpenAIApi } from "openai";
+
+export default async function handler(req, res) {
+  // Só aceitar requisições do tipo POST
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método não permitido.' });
+  }
+
+  try {
+    // Pega a mensagem enviada no corpo da requisição
+    const { userMessage } = req.body;
+
+    // Configura a API da OpenAI
+    const configuration = new Configuration({
+      apiKey: process.env.OPENAI_API_KEY, // Vamos usar variável de ambiente
+    });
+    const openai = new OpenAIApi(configuration);
+
+    // Faz a chamada ao GPT
+    const response = await openai.createCompletion({
+      model: "text-davinci-003",
+      prompt: userMessage,
+      max_tokens: 100,
+      temperature: 0.7
+    });
+
+    // Extrai o texto retornado pelo GPT
+    const gptAnswer = response.data.choices[0].text.trim();
+
+    // Retorna a resposta em JSON
+    res.status(200).json({ answer: gptAnswer });
+  } catch (error) {
+    console.error('Erro ao chamar a OpenAI API:', error);
+    res.status(500).json({ error: 'Ocorreu um erro ao processar a requisição.' });
+  }
+}

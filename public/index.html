@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Meu Chat com GPT</title>
+  </head>
+  <body>
+    <h1>Faça sua pergunta ao GPT</h1>
+    <textarea id="messageInput" rows="4" cols="50" placeholder="Digite sua mensagem..."></textarea>
+    <br />
+    <button id="sendBtn">Enviar</button>
+
+    <h2>Resposta:</h2>
+    <div id="response"></div>
+
+    <script>
+      const sendBtn = document.getElementById('sendBtn');
+      const messageInput = document.getElementById('messageInput');
+      const responseDiv = document.getElementById('response');
+
+      sendBtn.addEventListener('click', async () => {
+        const userMessage = messageInput.value.trim();
+        if (!userMessage) return;
+
+        responseDiv.textContent = 'Carregando...';
+
+        try {
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userMessage })
+          });
+          const data = await res.json();
+          
+          if (data.answer) {
+            responseDiv.textContent = data.answer;
+          } else {
+            responseDiv.textContent = 'Ocorreu um erro. Tente novamente.';
+          }
+        } catch (error) {
+          console.error('Erro:', error);
+          responseDiv.textContent = 'Erro na requisição.';
+        }
+      });
+    </script>
+  </body>
+</html>
